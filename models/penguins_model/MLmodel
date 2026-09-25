@@ -1,0 +1,38 @@
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.skops
+    predict_fn: predict
+    python_version: 3.12.14
+  sklearn:
+    code: null
+    pickled_model: model.skops
+    serialization_format: skops
+    sklearn_version: 1.9.1
+    skops_trusted_types:
+    - numpy.dtype
+    - sklearn.tree._tree.Tree
+is_signature_from_type_hint: false
+mlflow_version: 3.16.1
+model_id: null
+model_size_bytes: 5053813
+model_uuid: 4d07cc2bc66045a9953ded267bfb01a6
+prompts: null
+saved_input_example_info:
+  artifact_path: input_example.json
+  pandas_orient: split
+  serving_input_path: serving_input_example.json
+  type: dataframe
+signature:
+  inputs: '[{"type": "double", "name": "bill_length_mm", "required": true}, {"type":
+    "double", "name": "bill_depth_mm", "required": true}, {"type": "double", "name":
+    "flipper_length_mm", "required": true}, {"type": "double", "name": "body_mass_g",
+    "required": true}, {"type": "string", "name": "island", "required": true}, {"type":
+    "string", "name": "sex", "required": true}]'
+  outputs: '[{"type": "string", "required": true}]'
+  params: null
+type_hint_from_example: false
+utc_time_created: '2026-09-25 00:19:31.722916'

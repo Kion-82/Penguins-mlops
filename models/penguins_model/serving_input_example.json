@@ -1,0 +1,38 @@
+{
+  "dataframe_split": {
+    "columns": [
+      "bill_length_mm",
+      "bill_depth_mm",
+      "flipper_length_mm",
+      "body_mass_g",
+      "island",
+      "sex"
+    ],
+    "data": [
+      [
+        45.6,
+        20.3,
+        191.0,
+        4600.0,
+        "Biscoe",
+        "male"
+      ],
+      [
+        37.9,
+        18.6,
+        172.0,
+        3150.0,
+        "Biscoe",
+        "female"
+      ],
+      [
+        34.4,
+        18.4,
+        184.0,
+        3325.0,
+        "Torgersen",
+        "female"
+      ]
+    ]
+  }
+}
