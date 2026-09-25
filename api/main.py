@@ -5,6 +5,7 @@ from typing import Literal
 import numpy as np
 import pandas as pd
 from fastapi import FastAPI
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, Field
 
 from src.model import load_model
@@ -43,6 +44,10 @@ class Prediction(BaseModel):
     species: str
     probabilities: dict[str, float]
 
+@app.get("/", include_in_schema=False)
+def root() -> RedirectResponse:
+    """Send visitors of the bare URL to the interactive docs."""
+    return RedirectResponse(url="/docs")
 
 @app.get("/health")
 def health() -> dict:
