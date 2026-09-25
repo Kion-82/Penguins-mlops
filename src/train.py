@@ -15,6 +15,7 @@ EXPERIMENT_NAME = "penguins-classification"
 REGISTERED_MODEL_NAME = "penguins-classifier"
 CHAMPION_ALIAS = "champion"
 RANDOM_STATE = 42
+CV_FOLDS = 5
 
 # Order matters: simpler models first, so they win ties.
 CANDIDATES = {
@@ -33,7 +34,7 @@ def train_and_log(name, classifier, X_train, X_test, y_train, y_test) -> dict:
         mlflow.log_param("model_type", name)
         mlflow.log_params(classifier.get_params())
 
-        cv_scores = cross_val_score(model, X_train, y_train, cv=5, scoring="f1_macro")
+        cv_scores = cross_val_score(model, X_train, y_train, cv=CV_FOLDS, scoring="f1_macro")
         mlflow.log_metric("cv_f1_macro_mean", cv_scores.mean())
         mlflow.log_metric("cv_f1_macro_std", cv_scores.std())
 
@@ -59,15 +60,18 @@ def train_and_log(name, classifier, X_train, X_test, y_train, y_test) -> dict:
         "name": name,
         "cv_mean": cv_scores.mean(),
         "cv_std": cv_scores.std(),
+        "cv_se": cv_scores.std() / CV_FOLDS ** 0.5,
         "model": model,
         "model_uri": model_info.model_uri,
     }
 
 
 def select_best(results: list[dict]) -> dict:
-    """Highest CV F1 wins; ties go to lower std, then to the earlier (simpler) candidate."""
-    return min(results, key=lambda r: (-round(r["cv_mean"], 4), round(r["cv_std"], 4)))
-
+    """One-standard-error rule: the simplest candidate within 1 SE of the top CV score."""
+    top = max(results, key=lambda r: r["cv_mean"])
+    threshold = top["cv_mean"] - top["cv_se"]
+    # Candidates are ordered simplest first, so the first one above the threshold wins.
+    return next(r for r in results if r["cv_mean"] >= threshold)
 
 def register_champion(model_uri: str) -> str:
     """Register the model as a new version and point the 'champion' alias at it."""

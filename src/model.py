@@ -58,5 +58,4 @@ if __name__ == "__main__":
     prediction = model.predict(sample)[0]
     probabilities = model.predict_proba(sample)[0]
     print("Prediction:", prediction)
-    print("Probabilities:", dict(zip(model.classes_, probabilities.round(3))))
-    
+    print("Probabilities:", {c: round(float(p), 3) for c, p in zip(model.classes_, probabilities)})
