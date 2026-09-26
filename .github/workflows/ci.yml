@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Run tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Run tests
+        run: pytest -v
+
+  docker:
+    name: Build and smoke-test Docker image
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v7
+
+      - name: Build image
+        run: docker build -t penguins-api .
+
+      - name: Start container
+        run: docker run -d --name api -p 8000:8000 penguins-api
+
+      - name: Wait for the API to become healthy
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:8000/health; then
+              echo " -> API is healthy"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "API did not become healthy within 30 seconds"
+          exit 1
+
+      - name: Smoke-test a prediction
+        run: |
+          curl -sf -X POST http://localhost:8000/predict \
+            -H "Content-Type: application/json" \
+            -d '{"bill_length_mm": 39.1, "bill_depth_mm": 18.7, "flipper_length_mm": 181, "body_mass_g": 3750, "island": "Torgersen", "sex": "male"}' \
+            | tee response.json
+          grep -q '"species":"Adelie"' response.json
+
+      - name: Show container logs on failure
+        if: failure()
+        run: docker logs api
